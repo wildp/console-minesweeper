@@ -6,7 +6,7 @@
 #include <tchar.h>
 
 // enable or disable windows.h
-#define LIGHT_MODE
+//#define LIGHT_MODE
 
 #ifndef LIGHT_MODE
 #define USE_WIN
