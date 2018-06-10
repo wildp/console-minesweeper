@@ -1,7 +1,11 @@
 # Minesweeper
 A text based minesweeper game for the windows command prompt.
 
+## Screenshots
 
+![Screenshot 1](/screenshots/v1.0%20Demo%201.png?raw=true "Screenshot")
+![Screenshot 2](/screenshots/v1.0%20Demo%202.png?raw=true "Screenshot")
+![Screenshot 3](/screenshots/v1.0%20Demo%203.png?raw=true "Screenshot")
 
 ## Build instructions
 
