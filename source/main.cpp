@@ -66,10 +66,10 @@ namespace GamemodePresets
 namespace TextOutput
 {
 #ifdef USE_WIN
-	extern const HANDLE handleConsole{ GetStdHandle(STD_OUTPUT_HANDLE) }; ///win
+	extern const HANDLE handleConsole{ GetStdHandle(STD_OUTPUT_HANDLE) };
 #endif
 
-	void setup(short fontSize = 10) /// win
+	void setup(short fontSize = 10) 
 	{
 #ifdef USE_WIN
 		SetConsoleTitle(_T("Console Minesweeper")); 
@@ -121,16 +121,20 @@ namespace TextOutput
 		return;
 	}
 
-	void setColour(int option = 7) ///win
+	void setColour(int option = 7)
 	{	// colour 7 is default on console
 #ifdef USE_WIN
 		SetConsoleTextAttribute(handleConsole, option);
-#endif
+#endif // USE_WIN
+#ifdef USE_LIN
+		// DO SOMETHING //
+#endif // USE_LIN
 	}
 
-	void setColour(char c) ///win
+	void setColour(char c)
 	{	// picks colour according to symbol
 		int code{ 15 };
+#ifdef USE_WIN
 		switch (c)
 		{
 		case '1': code = 9;  break;
@@ -149,9 +153,13 @@ namespace TextOutput
 		default:  code = 7;  break;
 		}
 		setColour(code);
+#endif // USE_WIN
+#ifdef USE_LIN
+		// DO SOMETHING //
+#endif // USE_LIN	
 	}
 
-	void testColour() ///win
+	void testColour()
 	{
 		char chars[]{ ' ','1','2','3','4','5','6','7','8','#','!','?','X' };
 		for (auto &c : chars)
