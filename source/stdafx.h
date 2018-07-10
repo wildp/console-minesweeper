@@ -18,17 +18,22 @@
 // select platform: 
 // 0 none specified
 // 1 windows
-// 2 linux
-#define PLATFORM 1
+// 2 windows
+// 3 linux
+#define PLATFORM 2
+
 
 #if (PLATFORM == 0)
 #define LIGHT_MODE
 
 #elif (PLATFORM == 1)
 #define USE_WIN
-#define EXTRA_CONSOLE_STUFF
 
 #elif (PLATFORM == 2)
+#define USE_WIN
+#define EXTRA_CONSOLE_STUFF
+
+#elif (PLATFORM == 3)
 #define USE_LIN
 #endif
 
