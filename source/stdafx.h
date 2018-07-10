@@ -24,17 +24,16 @@
 
 
 #if (PLATFORM == 0)
-#define LIGHT_MODE
-
+	#define LIGHT_MODE
 #elif (PLATFORM == 1)
-#define USE_WIN
-
+	#define USE_WIN
 #elif (PLATFORM == 2)
-#define USE_WIN
-#define EXTRA_CONSOLE_STUFF
-
+	#define USE_WIN
+	#define EXTRA_CONSOLE_STUFF
 #elif (PLATFORM == 3)
-#define USE_LIN
+	#define USE_LIN
+#else
+	#define LIGHT_MODE
 #endif
 
 // header files referenced in main 
@@ -46,17 +45,17 @@
 #include <vector>
 
 #ifdef USE_WIN
-#define WIN32_LEAN_AND_MEAN
-#include <tchar.h>
-#include <windows.h> ///win
-#include <cwchar>
-#include <wchar.h>
+	#define WIN32_LEAN_AND_MEAN
+	#include <tchar.h>
+	#include <windows.h> ///win
+	#include <cwchar>
+	#include <wchar.h>
 #endif
 
 #ifndef USE_WIN
-#ifdef EXTRA_CONSOLE_STUFF
-#undef EXTRA_CONSOLE_STUFF
-#endif
+	#ifdef EXTRA_CONSOLE_STUFF
+	#undef EXTRA_CONSOLE_STUFF
+	#endif
 #endif
 
 /** Notes:
