@@ -17,4 +17,4 @@ A text based minesweeper game for the windows command prompt.
 
 3. Navigate to the source file directory on the developer command prompt using the `cd ` command.
 
-4. Enter `cl /EHsc main.cpp /Fe"Console Minesweeper"` into the developer command prompt.
+4. Enter `cl /EHsc /DPLATFORM=2 main.cpp /Fe"Console Minesweeper"` into the developer command prompt.
