@@ -15,12 +15,21 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
-// enable or disable windows.h
-//#define LIGHT_MODE
+// select platform: 
+// 0 none specified
+// 1 windows
+// 2 linux
+#define PLATFORM 1
 
-#ifndef LIGHT_MODE
+#if (PLATFORM == 0)
+#define LIGHT_MODE
+
+#elif (PLATFORM == 1)
 #define USE_WIN
 #define EXTRA_CONSOLE_STUFF
+
+#elif (PLATFORM == 2)
+#define USE_LIN
 #endif
 
 // header files referenced in main 
