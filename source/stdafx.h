@@ -15,12 +15,14 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
-// select platform: 
-// 0 none specified
-// 1 windows
-// 2 windows
-// 3 linux
-#define PLATFORM 2
+#ifndef PLATFORM
+	// select platform: 
+	// 0 none specified
+	// 1 windows
+	// 2 windows
+	// 3 linux
+	#define PLATFORM 2
+#endif
 
 
 #if (PLATFORM == 0)
