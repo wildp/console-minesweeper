@@ -22,7 +22,7 @@
 
 namespace Docs
 {
-	const std::string version     { "1.1" };
+	const std::string version     { "1.0" };
 	const std::string compiledate { static_cast<std::string>(__DATE__) };
 	const std::string lastupdate  { "May 18 2018" }; // this is for the help text, not the program
 
