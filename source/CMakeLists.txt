@@ -10,8 +10,8 @@ set(platform 0)
 # 4: ansi escape codes
 # 5: option 3 with windows virtual terminal sequences
 
-# Options 1,2, and 4 are exclusively for windows, while
-#   option 3 does not work on windows. Option 0 has no
+# Options 2,3, and 5 are exclusively for windows, while
+#   option 4 does not work on windows. Option 1 has no
 #   colour but shouldn't be platform specific.
 
 set(shortdocs 0)
