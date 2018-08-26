@@ -15,27 +15,49 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
-#ifndef PLATFORM
-	// select platform: 
-	// 0 none specified
-	// 1 windows
-	// 2 windows
-	// 3 linux
-	#define PLATFORM 2
+#if (PLATFORM == 0)
+	// select colour implementation: 
+	// 1 none
+	// 2 windows api
+	// 3 option 1 with window resizing 
+	// 4 ansi escape codes
+	// 5 option 3 with windows virtual terminal sequences
+	#ifdef _WIN32
+		#define PLATFORM 3
+	#else 
+		#define PLATFORM 4
+	#endif
 #endif
 
-
-#if (PLATFORM == 0)
+#if (PLATFORM == 1)
 	#define LIGHT_MODE
-#elif (PLATFORM == 1)
-	#define USE_WIN
+	#define DEFAULT_COLOUR 0
 #elif (PLATFORM == 2)
 	#define USE_WIN
-	#define EXTRA_CONSOLE_STUFF
+	#define DEFAULT_COLOUR 7
 #elif (PLATFORM == 3)
-	#define USE_LIN
+	#define USE_WIN
+	#define EXTRA_CONSOLE_STUFF
+	#define DEFAULT_COLOUR 7
+#elif (PLATFORM == 4)
+	#define USE_ESC
+	#define ESC "\x1b"
+	#define CSI ESC"["
+	#define OSC ESC"]"
+	#define BEL "\x07"
+	#define ST  ESC"\\"
+	#define DEFAULT_COLOUR 37
+#elif (PLATFORM == 5)
+	#define USE_ESC
+	#define USE_VT
+	#define ESC "\x1b"
+	#define CSI ESC"["
+	#define OSC ESC"]"
+	#define BEL "\x07" 
+	#define ST  ESC"\\"
+	#define DEFAULT_COLOUR 37
 #else
-	#define LIGHT_MODE
+	#error PLATFORM must be between 0 and 5
 #endif
 
 // header files referenced in main 
@@ -46,18 +68,33 @@
 #include <string>
 #include <vector>
 
+#ifdef USE_VT
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h> 
+#endif
+
 #ifdef USE_WIN
 	#define WIN32_LEAN_AND_MEAN
 	#include <tchar.h>
-	#include <windows.h> ///win
+	#include <windows.h>
 	#include <cwchar>
 	#include <wchar.h>
 #endif
 
 #ifndef USE_WIN
 	#ifdef EXTRA_CONSOLE_STUFF
-	#undef EXTRA_CONSOLE_STUFF
+		#undef EXTRA_CONSOLE_STUFF
 	#endif
+#endif
+
+#ifndef DEFAULT_COLOUR
+	#define DEFAULT_COLOUR 0
+#endif
+
+#ifdef USE_ESC
+constexpr bool escape{ true };
+#else 
+constexpr bool escape{ false };
 #endif
 
 /** Notes:
