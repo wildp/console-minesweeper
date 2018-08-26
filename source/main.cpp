@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include "stdafx.h"
 #include "docs.h"
 
 enum Gamemode
 {
+	MODE_TEST_INVERT       = -5,
+	MODE_TEST_COLOURS      = -4,
 	MODE_SHOW_LICENCE      = -3,
 	MODE_SHOW_HELP         = -2,
 	MODE_SHOW_CREDITS      = -1,
@@ -30,7 +31,8 @@ enum Gamemode
 	MODE_GRANDMASTER       =  6,
 	MODE_DEBUG             =  7,
 	MODE_CUSTOM            =  8,
-	MODE_ERROR             =  9,
+	MODE_ERROR             =  9,	
+	MODE_EXIT              = 10,
 };
 
 
@@ -63,10 +65,14 @@ namespace GamemodePresets
 	extern const int mines[]{ 10, 10, 40, 99, 99, 200, 648, 1, 0 };
 	}
 
+
 namespace TextOutput
 {
 #ifdef USE_WIN
 	extern const HANDLE handleConsole{ GetStdHandle(STD_OUTPUT_HANDLE) };
+#endif
+#ifdef USE_ESC
+	extern bool negative{ false };
 #endif
 
 	void setup(short fontSize = 10) 
@@ -74,7 +80,7 @@ namespace TextOutput
 #ifdef USE_WIN
 		SetConsoleTitle(_T("Console Minesweeper")); 
 
-#ifdef EXTRA_CONSOLE_STUFF
+	#ifdef EXTRA_CONSOLE_STUFF
 		CONSOLE_FONT_INFOEX font =
 		{
 			font.cbSize = sizeof(font),
@@ -116,19 +122,58 @@ namespace TextOutput
 
 		SMALL_RECT info = { 0, 0, c.X - 1, c.Y - 1 };
 		SetConsoleWindowInfo(handleConsole, TRUE, &info);
-#endif // EXTRA_CONSOLE_STUFF
+	#endif // EXTRA_CONSOLE_STUFF
 #endif // USE_WIN
+
+#ifdef USE_ESC
+	#ifdef USE_VT
+		// Set output mode to handle virtual terminal sequences
+		HANDLE Out = GetStdHandle(STD_OUTPUT_HANDLE);
+		if (Out == INVALID_HANDLE_VALUE)
+			exit(1);
+
+		DWORD OriginalOutMode = 0;
+
+		if (!GetConsoleMode(Out, &OriginalOutMode))
+			exit(1);
+
+		DWORD RequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
+
+		DWORD OutMode = OriginalOutMode | RequestedOutModes;
+		if (!SetConsoleMode(Out, OutMode))
+		{
+			RequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+			OutMode = OriginalOutMode | RequestedOutModes;
+			if (!SetConsoleMode(Out, OutMode))
+				exit(1);
+		}
+	#endif // USE_VT
+		std::cout << OSC "0;Console Minesweeper" ST;
+#endif // USE_ESC
 		return;
 	}
 
-	void setColour(int option = 7)
-	{	// colour 7 is default on console
+	void setColour(int option = -1)
+	{	// colour 7 is default on windows console, 37 with ansi colour codes
 #ifdef USE_WIN
 		SetConsoleTextAttribute(handleConsole, option);
 #endif // USE_WIN
-#ifdef USE_LIN
-		// DO SOMETHING //
-#endif // USE_LIN
+#ifdef USE_ESC
+
+		if (negative && option != -1)
+			std::cout << CSI"7m";
+		else
+			std::cout << CSI"27m";
+
+		if (option == -1)
+			option = DEFAULT_COLOUR;
+
+		std::string ostring{ CSI };
+		ostring.append(std::to_string(option)).append("m");
+		std::cout << ostring;
+		
+		
+#endif // USE_ESC
 	}
 
 	void setColour(char c)
@@ -150,14 +195,37 @@ namespace TextOutput
 		case '?': code = 15; break;
 		case 'X': code = 12; break;
 		case ':': code = 11; break;
-		default:  code = 7;  break;
+		default:  code = DEFAULT_COLOUR;  break;
 		}
-		setColour(code);
 #endif // USE_WIN
-#ifdef USE_LIN
-		// DO SOMETHING //
-#endif // USE_LIN	
+#ifdef USE_ESC
+		switch (c)
+		{
+		case '1': code = 94;  break;
+		case '2': code = 32;  break;
+		case '3': code = 31;  break;
+		case '4': code = 34;  break;
+		case '5': code = 35;  break;
+		case '6': code = 36;  break;
+		case '7': code = 33;  break;
+		case '8': code = 90;  break;
+		case '#': code = 37;  break;
+		case '!': code = 91; break;
+		case '?': code = 97; break;
+		case 'X': code = 91; break;
+		case ':': code = 96; break;
+		default:  code = DEFAULT_COLOUR;  break;
+		}
+#endif // USE_ESC
+		setColour(code);
 	}
+
+#ifdef USE_ESC
+	void toggleState()
+	{
+		negative = (negative) ? false : true;
+	}
+#endif
 
 	void testColour()
 	{
@@ -180,27 +248,28 @@ namespace TextDisplay
 
 	void lastupdate()
 	{
-		TextOutput::setColour(8);
+		TextOutput::setColour((escape) ? 90 : 8);
 		std::cout << "Last updated " << Docs::lastupdate << '\n';
 		TextOutput::setColour();
 	}
 
 	void compiledate()
 	{
-		TextOutput::setColour(8);
+		TextOutput::setColour((escape) ? 90 : 8);
 		std::cout << "Compiled " << Docs::compiledate << '\n';
 		TextOutput::setColour();
 	}
 
 	void showfill()
 	{
-		TextOutput::setColour(8);
+		TextOutput::setColour((escape) ? 90 : 8);
 		std::cout << '\n' << Docs::fill << '\n';
-		TextOutput::setColour();
+		TextOutput::setColour((escape) ? 37 : 7);
 	}
 
 	void showoptions()
 	{
+		TextOutput::setColour();
 		std::cout << '\n' << Docs::helptext << '\n' << Docs::modes;
 	}
 
@@ -242,7 +311,6 @@ namespace TextDisplay
 	}
 
 }
-
 
 namespace TextInput
 {
@@ -455,6 +523,12 @@ namespace TextInput
 			return MODE_NOVICE;
 		case 'Z': case 'z':
 			return MODE_SHOW_CREDITS;
+		case 'X': case 'x':
+			return MODE_EXIT;
+		case 'T': case 't':
+			return MODE_TEST_COLOURS;
+		case 'V': case 'v':
+			return MODE_TEST_INVERT;
 		default:
 			return MODE_ERROR;
 		}
@@ -464,6 +538,7 @@ namespace TextInput
 	{
 		char c{};
 		Gamemode g{ MODE_ERROR };
+		TextOutput::setColour();
 		TextDisplay::showoptions();
 		while (true)
 		{
@@ -555,7 +630,6 @@ public:
 	const char getSymbol() { return m_symbol; }
 	const int  getNumber() { return m_number; }
 };
-
 
 class World		
 {
@@ -734,7 +808,7 @@ private:
 		}
 	}
 
-	void displayGuidesColour() ///
+	void displayGuidesColour()
 	{	// displays grid of mines with axes in colour
 		TextOutput::setColour();
 		std::cout << "\n #  ";
@@ -756,7 +830,7 @@ private:
 		TextOutput::setColour();
 	}
 
-	void displayMine() ///temp
+	void displayMine()
 	{	// displays grid with a bool if a mine is present
 		for (int row{ 0 }; row < m_size.row; ++row)
 		{
@@ -774,7 +848,7 @@ private:
 			if (mine.getSymbol() == '!')
 				count--;
 		if (count < 0) count = 0;
-		TextOutput::setColour(8);
+		TextOutput::setColour((escape) ? 90 : 8);
 		std::cout << "\nMines left: " << count << '\n';
 		TextOutput::setColour();
 	}
@@ -912,7 +986,7 @@ bool win(World &w)
 {
 	if (w.checkwin())
 	{
-		TextOutput::setColour(10);
+		TextOutput::setColour((escape) ? 92 : 10);
 		std::cout << "\nYou have won\n";
 		TextOutput::setColour();
 		return true;
@@ -953,7 +1027,7 @@ int gameText(Gamemode preset)
 
 	if (lose)
 	{
-		TextOutput::setColour(12);
+		TextOutput::setColour((escape) ? 91 : 12);
 		std::cout << "\nYou have died\n";
 		TextOutput::setColour();
 	}
@@ -962,7 +1036,6 @@ int gameText(Gamemode preset)
 	world.display(false);
 	return 0;
 }
-
 
 
 int main()
@@ -980,6 +1053,8 @@ int main()
 		case MODE_ERROR:
 			autoreplay = true;
 			break;
+		case MODE_EXIT:
+			exit(0);
 		case MODE_SHOW_HELP:
 			TextDisplay::showhelp();
 			autoreplay = true;
@@ -992,6 +1067,17 @@ int main()
 			TextDisplay::showcredits();
 			autoreplay = true;
 			break;
+		case MODE_TEST_COLOURS:
+			std::cout << '\n';
+			TextOutput::testColour();
+			autoreplay = true;
+			break;
+		case MODE_TEST_INVERT:
+#ifdef USE_ESC
+			TextOutput::toggleState();
+#endif
+			autoreplay = true;
+			break;
 		default:
 			gameText(p);
 			autoreplay = false;
@@ -1002,4 +1088,3 @@ int main()
 	} while (replay(autoreplay));
 	return 0;
 }
-

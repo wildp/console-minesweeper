@@ -7,14 +7,22 @@ A text based minesweeper game for the windows command prompt.
 ![Screenshot 2](/screenshots/v1.0%20Demo%202.png?raw=true "Screenshot")
 ![Screenshot 3](/screenshots/v1.0%20Demo%203.png?raw=true "Screenshot")
 
-## Build instructions
+## Instructions
+See [HELP.md](HELP.md).
 
-### Command Line Visual C++ 
+## Build Instructions
 
-1. Download and extract the source files.
-
-2. Open the **Developer Command Prompt** for Visual Studio or **x86 Native Tools Command Prompt** or **x64 Native Tools Command Prompt**. 
-
-3. Navigate to the source file directory on the developer command prompt using the `cd ` command.
-
-4. Enter `cl /EHsc /O1 /DPLATFORM=2 main.cpp /Fe"Console Minesweeper"` into the developer command prompt.
+In [CMakeLists.txt](source/CMakeLists.txt), `PLATFORM` needs to be changed
+to the desired option (on line 4).
+```python
+set(platform 0)
+# Select colour implementation: 
+# 0: automatic
+# 1: none (use 0 or any non-number)
+# 2: windows api
+# 3: option 1 with window resizing
+# 4: ansi escape codes
+# 5: option 3 with windows virtual terminal sequences
+```
+Options 2, 3, and 5 are exclusively for windows, while option 4 does not work on windows (but should do
+on other platforms). Option 1 has no colour but shouldn't be platform specific.
