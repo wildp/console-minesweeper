@@ -156,6 +156,9 @@ namespace TextOutput
 	void setColour(int option = -1)
 	{	// colour 7 is default on windows console, 37 with ansi colour codes
 #ifdef USE_WIN
+		if (option == -1)
+			option = DEFAULT_COLOUR;
+
 		SetConsoleTextAttribute(handleConsole, option);
 #endif // USE_WIN
 #ifdef USE_ESC
